@@ -266,7 +266,9 @@ func (d *Dupe) DeleteDuplicates() error {
 		processed := 0
 		fmt.Printf("Found %d elements for hash %x:\n", length, hash)
 
-		for _, file := range files {
+		fileSlice := files.ToSlice().SortByPath()
+
+		for i, file := range fileSlice {
 			select {
 			case <-d.ctx.Done():
 				return ErrProcessStopped
@@ -280,41 +282,59 @@ func (d *Dupe) DeleteDuplicates() error {
 				break
 			}
 
-			del := false
-			if d.config.DelMatch != nil && d.config.DelMatch.MatchString(file.Path) {
-				fmt.Printf("  * Path %s matches del regex, deleting...\n", file.Path)
-				del = true
-			} else if d.config.KeepMatch != nil && !d.config.KeepMatch.MatchString(file.Path) {
-				fmt.Printf("  * Path %s doesn't match keep regex, deleting...\n", file.Path)
-				del = true
-			}
-
 			// no deletion rules matched
-			if !del {
+			if !d.matchRules(fileSlice, i, file) {
 				continue
 			}
 
 			// add processed even if deletion fails, to be safe
 			processed++
 
-			if !d.config.Delete {
-				continue
+			if d.config.Delete {
+				d.deleteFile(file)
 			}
 
-			if err := os.Remove(file.Path); err != nil {
-				fmt.Printf("  * Error deleting %s: %s\n", file.Path, err)
-			}
-
-			if _, err := os.Stat(file.Path); err != nil {
-				if d.database.Files[file.Size] != nil {
-					delete(d.database.Files[file.Size], file.Path)
-				}
-				delete(d.database.Hashes[file.Hash], file.Path)
-			}
 		}
 	}
 
 	return nil
+}
+
+func (d *Dupe) matchRules(fileSlice file.Slice, i int, fil *file.File) (matched bool) {
+	if d.config.KeepRecent && fil != fileSlice.Clone().SortByTime(file.SortDescending)[0] {
+		fmt.Printf("  ↳ not most recent entry\n")
+		matched = true
+	} else if d.config.KeepOldest && fil != fileSlice.Clone().SortByTime(file.SortAscending)[0] {
+		fmt.Printf("  ↳ not oldest entry\n")
+		matched = true
+	} else if d.config.KeepFirst && i != 0 {
+		fmt.Printf("  ↳ not first entry\n")
+		matched = true
+	} else if d.config.KeepLast && i != len(fileSlice)-1 {
+		fmt.Printf("  ↳ not last entry\n")
+		matched = true
+	} else if d.config.DelMatch != nil && d.config.DelMatch.MatchString(fil.Path) {
+		fmt.Printf("  ↳ matches del regex\n")
+		matched = true
+	} else if d.config.KeepMatch != nil && !d.config.KeepMatch.MatchString(fil.Path) {
+		fmt.Printf("  ↳ does not match keep regex\n")
+		matched = true
+	}
+	return
+}
+
+func (d *Dupe) deleteFile(file *file.File) {
+	fmt.Printf("  ↳ deleting...\n")
+	if err := os.Remove(file.Path); err != nil {
+		fmt.Printf("  ↳ error deleting %s\n", err)
+	}
+
+	if _, err := os.Stat(file.Path); err != nil {
+		if d.database.Files[file.Size] != nil {
+			delete(d.database.Files[file.Size], file.Path)
+		}
+		delete(d.database.Hashes[file.Hash], file.Path)
+	}
 }
 
 func (d *Dupe) ReadDatabase() error {
