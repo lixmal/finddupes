@@ -301,22 +301,23 @@ func (d *Dupe) DeleteDuplicates() error {
 }
 
 func (d *Dupe) matchRules(fileSlice file.Slice, i int, fil *file.File) (matched bool) {
-	if d.config.KeepRecent && fil != fileSlice.Clone().SortByTime(file.SortDescending)[0] {
+	switch {
+	case d.config.KeepRecent && fil != fileSlice.Clone().SortByTime(file.SortDescending)[0]:
 		fmt.Printf("  ↳ not most recent entry\n")
 		matched = true
-	} else if d.config.KeepOldest && fil != fileSlice.Clone().SortByTime(file.SortAscending)[0] {
+	case d.config.KeepOldest && fil != fileSlice.Clone().SortByTime(file.SortAscending)[0]:
 		fmt.Printf("  ↳ not oldest entry\n")
 		matched = true
-	} else if d.config.KeepFirst && i != 0 {
+	case d.config.KeepFirst && i != 0:
 		fmt.Printf("  ↳ not first entry\n")
 		matched = true
-	} else if d.config.KeepLast && i != len(fileSlice)-1 {
+	case d.config.KeepLast && i != len(fileSlice)-1:
 		fmt.Printf("  ↳ not last entry\n")
 		matched = true
-	} else if d.config.DelMatch != nil && d.config.DelMatch.MatchString(fil.Path) {
+	case d.config.DelMatch != nil && d.config.DelMatch.MatchString(fil.Path):
 		fmt.Printf("  ↳ matches del regex\n")
 		matched = true
-	} else if d.config.KeepMatch != nil && !d.config.KeepMatch.MatchString(fil.Path) {
+	case d.config.KeepMatch != nil && !d.config.KeepMatch.MatchString(fil.Path):
 		fmt.Printf("  ↳ does not match keep regex\n")
 		matched = true
 	}
