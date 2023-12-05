@@ -4,7 +4,6 @@
 *.dll
 *.so
 *.dylib
-finddupes
 
 # Test binary, build with `go test -c`
 *.test
