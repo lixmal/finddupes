@@ -50,13 +50,13 @@ func (d *Database) Read(path string) error {
 	}
 	defer misc.Close(path, file)
 
-	// TODO: fix reading db from interface
 	var db Database
 	if err := gob.NewDecoder(file).Decode(&db); err != nil {
 		return fmt.Errorf("read database: %w", err)
 	}
 
-	*d = db
+	d.Files = db.Files
+	d.Hashes = db.Hashes
 
 	return nil
 }
