@@ -73,6 +73,9 @@ func TestDupe_matchRules_KeepRecent(t *testing.T) {
 
 	dupe := New(config.Config{KeepRecent: true})
 
+	sortedByTime := files.Clone().SortByTime(file.SortDescending)
+	mostRecent := sortedByTime[0]
+
 	tests := []struct {
 		name     string
 		index    int
@@ -101,7 +104,7 @@ func TestDupe_matchRules_KeepRecent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			matched := dupe.matchRules(files, tt.index, tt.file)
+			matched := dupe.matchRules(files, tt.index, tt.file, mostRecent, nil)
 			assert.Equal(t, tt.expected, matched)
 		})
 	}
@@ -119,6 +122,9 @@ func TestDupe_matchRules_KeepOldest(t *testing.T) {
 	}
 
 	dupe := New(config.Config{KeepOldest: true})
+
+	sortedByTime := files.Clone().SortByTime(file.SortDescending)
+	oldestFile := sortedByTime[len(sortedByTime)-1]
 
 	tests := []struct {
 		name     string
@@ -148,7 +154,7 @@ func TestDupe_matchRules_KeepOldest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			matched := dupe.matchRules(files, tt.index, tt.file)
+			matched := dupe.matchRules(files, tt.index, tt.file, nil, oldestFile)
 			assert.Equal(t, tt.expected, matched)
 		})
 	}
@@ -187,7 +193,7 @@ func TestDupe_matchRules_KeepFirst(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			matched := dupe.matchRules(files, tt.index, files[tt.index])
+			matched := dupe.matchRules(files, tt.index, files[tt.index], nil, nil)
 			assert.Equal(t, tt.expected, matched)
 		})
 	}
@@ -226,7 +232,7 @@ func TestDupe_matchRules_KeepLast(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			matched := dupe.matchRules(files, tt.index, files[tt.index])
+			matched := dupe.matchRules(files, tt.index, files[tt.index], nil, nil)
 			assert.Equal(t, tt.expected, matched)
 		})
 	}
@@ -266,7 +272,7 @@ func TestDupe_matchRules_DelMatch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			matched := dupe.matchRules(files, tt.index, files[tt.index])
+			matched := dupe.matchRules(files, tt.index, files[tt.index], nil, nil)
 			assert.Equal(t, tt.expected, matched)
 		})
 	}
@@ -306,7 +312,7 @@ func TestDupe_matchRules_KeepMatch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			matched := dupe.matchRules(files, tt.index, files[tt.index])
+			matched := dupe.matchRules(files, tt.index, files[tt.index], nil, nil)
 			assert.Equal(t, tt.expected, matched)
 		})
 	}
@@ -321,7 +327,7 @@ func TestDupe_matchRules_NoRules(t *testing.T) {
 	dupe := New(config.Config{})
 
 	for i, f := range files {
-		matched := dupe.matchRules(files, i, f)
+		matched := dupe.matchRules(files, i, f, nil, nil)
 		assert.False(t, matched, "No rules configured, but file %s matched", f.Path)
 	}
 }

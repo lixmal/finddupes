@@ -211,7 +211,7 @@ func (d *Dupe) calculateHash(wg *sync.WaitGroup, jobs <-chan *file.File) {
 }
 
 func (d *Dupe) CalculateHashes() (err error) {
-	jobs := make(chan *file.File)
+	jobs := make(chan *file.File, d.config.Workers*2)
 
 	var wg sync.WaitGroup
 	// start workers
@@ -267,6 +267,17 @@ func (d *Dupe) DeleteDuplicates() error {
 
 		fileSlice := files.ToSlice().SortByPath()
 
+		var mostRecent, oldest *file.File
+		if d.config.KeepRecent || d.config.KeepOldest {
+			sortedByTime := fileSlice.Clone().SortByTime(file.SortDescending)
+			if d.config.KeepRecent {
+				mostRecent = sortedByTime[0]
+			}
+			if d.config.KeepOldest {
+				oldest = sortedByTime[len(sortedByTime)-1]
+			}
+		}
+
 		for i, file := range fileSlice {
 			select {
 			case <-d.ctx.Done():
@@ -282,7 +293,7 @@ func (d *Dupe) DeleteDuplicates() error {
 			}
 
 			// no deletion rules matched
-			if !d.matchRules(fileSlice, i, file) {
+			if !d.matchRules(fileSlice, i, file, mostRecent, oldest) {
 				continue
 			}
 
@@ -299,12 +310,12 @@ func (d *Dupe) DeleteDuplicates() error {
 	return nil
 }
 
-func (d *Dupe) matchRules(fileSlice file.Slice, i int, fil *file.File) (matched bool) {
+func (d *Dupe) matchRules(fileSlice file.Slice, i int, fil *file.File, mostRecent, oldest *file.File) (matched bool) {
 	switch {
-	case d.config.KeepRecent && fil != fileSlice.Clone().SortByTime(file.SortDescending)[0]:
+	case d.config.KeepRecent && fil != mostRecent:
 		fmt.Printf("  ↳ not most recent entry\n")
 		matched = true
-	case d.config.KeepOldest && fil != fileSlice.Clone().SortByTime(file.SortAscending)[0]:
+	case d.config.KeepOldest && fil != oldest:
 		fmt.Printf("  ↳ not oldest entry\n")
 		matched = true
 	case d.config.KeepFirst && i != 0:
@@ -327,14 +338,13 @@ func (d *Dupe) deleteFile(file *file.File) {
 	fmt.Printf("  ↳ deleting...\n")
 	if err := os.Remove(file.Path); err != nil {
 		fmt.Printf("  ↳ error deleting %s\n", err)
+		return
 	}
 
-	if _, err := os.Stat(file.Path); err != nil {
-		if d.database.Files[file.Size] != nil {
-			delete(d.database.Files[file.Size], file.Path)
-		}
-		delete(d.database.Hashes[file.Hash], file.Path)
+	if d.database.Files[file.Size] != nil {
+		delete(d.database.Files[file.Size], file.Path)
 	}
+	delete(d.database.Hashes[file.Hash], file.Path)
 }
 
 func (d *Dupe) ReadDatabase() error {

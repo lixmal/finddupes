@@ -8,14 +8,15 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
+	"runtime"
 	"syscall"
 
 	"github.com/lixmal/finddupes/pkg/config"
 	"github.com/lixmal/finddupes/pkg/dupe"
 )
 
-const (
-	workers int = 10
+var (
+	workers int = runtime.NumCPU()
 )
 
 var (

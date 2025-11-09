@@ -53,9 +53,10 @@ func (s Slice) SortByTime(dir direction) Slice {
 
 type Map map[string]*File
 
-func (m Map) ToSlice() (s Slice) {
+func (m Map) ToSlice() Slice {
+	s := make(Slice, 0, len(m))
 	for _, v := range m {
 		s = append(s, v)
 	}
-	return
+	return s
 }
