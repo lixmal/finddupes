@@ -132,8 +132,10 @@ func TestDatabase_LockUnlock(t *testing.T) {
 	db := New()
 
 	done := make(chan bool)
+	locked := false
 	go func() {
 		db.Lock()
+		locked = true
 		time.Sleep(50 * time.Millisecond)
 		db.Unlock()
 		done <- true
@@ -141,6 +143,7 @@ func TestDatabase_LockUnlock(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 	db.Lock()
+	assert.True(t, locked, "Goroutine should have acquired lock first")
 	db.Unlock()
 
 	select {

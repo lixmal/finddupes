@@ -204,15 +204,23 @@ func BenchmarkDeleteDuplicates_Small(b *testing.B) {
 
 		for j := 0; j < 10; j++ {
 			filePath := filepath.Join(tmpDir, filepath.Base(tmpDir)+string(rune('a'+j))+".txt")
-			os.WriteFile(filePath, []byte("duplicate"), 0644)
+			if err := os.WriteFile(filePath, []byte("duplicate"), 0644); err != nil {
+				b.Fatal(err)
+			}
 		}
 
 		dupe := New(config.Config{Workers: 2, Delete: false, KeepRecent: true})
-		dupe.IndexFiles([]string{tmpDir})
-		dupe.CalculateHashes()
+		if err := dupe.IndexFiles([]string{tmpDir}); err != nil {
+			b.Fatal(err)
+		}
+		if err := dupe.CalculateHashes(); err != nil {
+			b.Fatal(err)
+		}
 
 		b.StartTimer()
-		dupe.DeleteDuplicates()
+		if err := dupe.DeleteDuplicates(); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -224,14 +232,22 @@ func BenchmarkDeleteDuplicates_Large(b *testing.B) {
 
 		for j := 0; j < 100; j++ {
 			filePath := filepath.Join(tmpDir, filepath.Base(tmpDir)+string(rune('a'+j%26))+".txt")
-			os.WriteFile(filePath, []byte("duplicate"), 0644)
+			if err := os.WriteFile(filePath, []byte("duplicate"), 0644); err != nil {
+				b.Fatal(err)
+			}
 		}
 
 		dupe := New(config.Config{Workers: 4, Delete: false, KeepOldest: true})
-		dupe.IndexFiles([]string{tmpDir})
-		dupe.CalculateHashes()
+		if err := dupe.IndexFiles([]string{tmpDir}); err != nil {
+			b.Fatal(err)
+		}
+		if err := dupe.CalculateHashes(); err != nil {
+			b.Fatal(err)
+		}
 
 		b.StartTimer()
-		dupe.DeleteDuplicates()
+		if err := dupe.DeleteDuplicates(); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
