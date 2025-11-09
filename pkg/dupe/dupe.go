@@ -65,8 +65,7 @@ func (d *Dupe) ProcessFiles(filePaths []string) (err error) {
 	defer func() {
 		if d.config.Path != "" {
 			if err2 := d.WriteDatabase(); err2 != nil {
-				// overwriting return err value
-				err = fmt.Errorf("process files: %w", err)
+				err = fmt.Errorf("process files: write database: %w", err2)
 				return
 			}
 		}
@@ -76,7 +75,7 @@ func (d *Dupe) ProcessFiles(filePaths []string) (err error) {
 		return fmt.Errorf("process files: index files: %w", err)
 	}
 
-	if err = d.CalculcateHashes(); err != nil {
+	if err = d.CalculateHashes(); err != nil {
 		return fmt.Errorf("process files: calculate hashes: %w", err)
 	}
 
@@ -211,7 +210,7 @@ func (d *Dupe) calculateHash(wg *sync.WaitGroup, jobs <-chan *file.File) {
 	}
 }
 
-func (d *Dupe) CalculcateHashes() (err error) {
+func (d *Dupe) CalculateHashes() (err error) {
 	jobs := make(chan *file.File)
 
 	var wg sync.WaitGroup

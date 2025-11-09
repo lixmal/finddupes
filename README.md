@@ -7,9 +7,9 @@ Finds duplicate files based on hash and deletes them based on a given pattern.
 
 `finddupes` tries to be efficient by
 
-- comparing file size before running expensive hash caluculations
+- comparing file size before running expensive hash calculations
 - using hash tables to find duplicate sizes/hashes in constant time on avg
-- using the fast [xxHash](https://github.com/Cyan4973/xxHash) algorithm to calulcate hashes
+- using the fast [xxHash](https://github.com/Cyan4973/xxHash) algorithm to calculate hashes
 - running things in parallel. However, this only really helps if directories to be searched for reside on different media
 - using an optional "cache" that can be reused and extended for multiple searches/deletions
 
@@ -23,7 +23,7 @@ Run finddupes with the `-help` flag to get all options:
 
     finddupes -help
 
-The exection can be interruped with `Ctrl-c`. This will gracefully finish all calulcation
+The execution can be interrupted with `Ctrl-c`. This will gracefully finish all calculation
 and write operations before shutting down.
 
 ### Find duplicates in given directories

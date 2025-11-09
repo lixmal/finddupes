@@ -426,7 +426,7 @@ func TestDupe_CalculateHashes(t *testing.T) {
 	dupe := New(config.Config{Workers: 2})
 	require.NoError(t, dupe.IndexFiles([]string{tmpDir}))
 
-	err := dupe.CalculcateHashes()
+	err := dupe.CalculateHashes()
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, dupe.database.Hashes, "Hashes should be calculated")
@@ -448,7 +448,7 @@ func TestDupe_CalculateHashes_DifferentContent(t *testing.T) {
 	dupe := New(config.Config{Workers: 2})
 	require.NoError(t, dupe.IndexFiles([]string{tmpDir}))
 
-	err := dupe.CalculcateHashes()
+	err := dupe.CalculateHashes()
 	if err != nil && err != ErrProcessStopped {
 		require.NoError(t, err)
 	}
@@ -471,7 +471,7 @@ func TestDupe_DeleteDuplicates_DryRun(t *testing.T) {
 	})
 
 	require.NoError(t, dupe.IndexFiles([]string{tmpDir}))
-	require.NoError(t, dupe.CalculcateHashes())
+	require.NoError(t, dupe.CalculateHashes())
 
 	err := dupe.DeleteDuplicates()
 	require.NoError(t, err)
@@ -499,7 +499,7 @@ func TestDupe_DeleteDuplicates_ActualDelete_KeepFirst(t *testing.T) {
 	})
 
 	require.NoError(t, dupe.IndexFiles([]string{tmpDir}))
-	require.NoError(t, dupe.CalculcateHashes())
+	require.NoError(t, dupe.CalculateHashes())
 
 	err := dupe.DeleteDuplicates()
 	require.NoError(t, err)
@@ -528,7 +528,7 @@ func TestDupe_DeleteDuplicates_ActualDelete_KeepLast(t *testing.T) {
 	})
 
 	require.NoError(t, dupe.IndexFiles([]string{tmpDir}))
-	require.NoError(t, dupe.CalculcateHashes())
+	require.NoError(t, dupe.CalculateHashes())
 
 	err := dupe.DeleteDuplicates()
 	require.NoError(t, err)
@@ -558,7 +558,7 @@ func TestDupe_DeleteDuplicates_ActualDelete_KeepRecent(t *testing.T) {
 	})
 
 	require.NoError(t, dupe.IndexFiles([]string{tmpDir}))
-	require.NoError(t, dupe.CalculcateHashes())
+	require.NoError(t, dupe.CalculateHashes())
 
 	err := dupe.DeleteDuplicates()
 	require.NoError(t, err)
@@ -587,7 +587,7 @@ func TestDupe_DeleteDuplicates_ActualDelete_KeepOldest(t *testing.T) {
 	})
 
 	require.NoError(t, dupe.IndexFiles([]string{tmpDir}))
-	require.NoError(t, dupe.CalculcateHashes())
+	require.NoError(t, dupe.CalculateHashes())
 
 	err := dupe.DeleteDuplicates()
 	require.NoError(t, err)
@@ -616,7 +616,7 @@ func TestDupe_DeleteDuplicates_ActualDelete_DelMatch(t *testing.T) {
 	})
 
 	require.NoError(t, dupe.IndexFiles([]string{tmpDir}))
-	require.NoError(t, dupe.CalculcateHashes())
+	require.NoError(t, dupe.CalculateHashes())
 
 	err := dupe.DeleteDuplicates()
 	require.NoError(t, err)
@@ -646,7 +646,7 @@ func TestDupe_DeleteDuplicates_ActualDelete_KeepMatch(t *testing.T) {
 	})
 
 	require.NoError(t, dupe.IndexFiles([]string{tmpDir}))
-	require.NoError(t, dupe.CalculcateHashes())
+	require.NoError(t, dupe.CalculateHashes())
 
 	err := dupe.DeleteDuplicates()
 	require.NoError(t, err)
@@ -673,7 +673,7 @@ func TestDupe_DeleteDuplicates_OnlyOneCopy(t *testing.T) {
 	})
 
 	require.NoError(t, dupe.IndexFiles([]string{tmpDir}))
-	require.NoError(t, dupe.CalculcateHashes())
+	require.NoError(t, dupe.CalculateHashes())
 
 	err := dupe.DeleteDuplicates()
 	require.NoError(t, err)
@@ -705,7 +705,7 @@ func TestDupe_DeleteDuplicates_NoDuplicates(t *testing.T) {
 	})
 
 	require.NoError(t, dupe.IndexFiles([]string{tmpDir}))
-	require.NoError(t, dupe.CalculcateHashes())
+	require.NoError(t, dupe.CalculateHashes())
 
 	err := dupe.DeleteDuplicates()
 	require.NoError(t, err)

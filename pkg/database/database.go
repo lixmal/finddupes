@@ -29,13 +29,12 @@ func (d *Database) Write(path string) error {
 	if err != nil {
 		return fmt.Errorf("write database: %w", err)
 	}
-	defer file.Close()
 
 	if err := gob.NewEncoder(file).Encode(d); err != nil {
+		file.Close()
 		return fmt.Errorf("write database: %w", err)
 	}
 
-	// explicit close to catch any errors writing
 	if err = file.Close(); err != nil {
 		return fmt.Errorf("write database: %w", err)
 	}
